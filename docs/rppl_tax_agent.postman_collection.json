@@ -1,0 +1,71 @@
+{
+  "info": {
+    "name": "RPPL Tax Agent API (Preview)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Claims",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/claims",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "claims"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Claim",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"title\": \"My New Claim\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/claims",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "claims"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Activities",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/activities",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "activities"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://rppl-tax-api.mockoon.cloud"
+    }
+  ]
+}

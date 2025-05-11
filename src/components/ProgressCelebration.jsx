@@ -2,12 +2,13 @@ import React from 'react';
 import Lottie from 'lottie-react';
 import confettiAnimation from '../animations/confetti.json';
 
-export default function ProgressCelebration({ visible }) {
+export default function ProgressCelebration({ visible = false }) {
   if (!visible) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
       <div className="w-64 h-64">
-        <Lottie animationData={confettiAnimation} loop={false} />
+        <Lottie animationData={confettiAnimation} loop={false} autoplay />
       </div>
     </div>
   );

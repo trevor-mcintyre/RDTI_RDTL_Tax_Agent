@@ -1,11 +1,22 @@
-import React
-import MotivationBanner from '../components/MotivationBanner'; from 'react';
+import React from 'react';
 import { generateClaimExportZip } from '../utils/exportUtils';
 
 export default function ExportClaimButton({ companyId }) {
   const handleExport = async () => {
     try {
-      await generateClaimExportZip(companyId);
+      const blob = await generateClaimExportZip(companyId);
+
+      if (!blob) throw new Error("No ZIP returned");
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `rdti-claim-${companyId}.zip`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
       alert('✅ Export complete! ZIP file downloaded.');
     } catch (err) {
       console.error('Export failed:', err);

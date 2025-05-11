@@ -1,26 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { getPriorYearClaims } from '../services/priorYearService';
+import React, { useEffect, useState } from "react";
+import Button from "../components/Button";
+import { getPriorYearClaims } from "../services/priorYearService";
+import Card from "../components/Card";
+import Loading from "../components/Loading";
+import EmptyState from "../components/EmptyState";
+import { toast } from "react-hot-toast";
 
 const PriorYearClaims = () => {
-  const [claims, setClaims] = useState([]);
+  const [claims, setClaims] = useState(null);
 
   useEffect(() => {
-    getPriorYearClaims().then(setClaims);
+    const fetchClaims = async () => {
+      try {
+        const result = await getPriorYearClaims();
+        setClaims(result);
+      } catch (error) {
+        toast.error("Failed to load claims. Please try again later.");
+        setClaims([]);
+        console.error("Error fetching prior year claims:", error);
+      }
+    };
+
+    fetchClaims();
   }, []);
 
+  if (!claims) return <Loading />;
+  if (claims.length === 0)
+    return <EmptyState message="No prior year claims found." icon="📂" />;
+
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">📁 Prior Year R&D Claims</h1>
-      <p className="text-sm text-gray-600 mb-6">Review summaries of your past RDTI/RDTL claims by year.</p>
+    <div className="space-y-8">
+      <header className="space-y-2">
+        <h1 className="text-3xl font-bold text-gray-900">📁 Prior Year R&D Claims</h1>
+        <p className="text-sm text-gray-600">
+          Review summaries of your past RDTI/RDTL claims by year.
+        </p>
+      </header>
+
       <div className="space-y-4">
         {claims.map((claim) => (
-          <div key={claim.id} className="p-4 bg-white rounded shadow border">
-            <h2 className="font-semibold text-lg text-gray-700">📅 {claim.fiscal_year}</h2>
-            <p className="text-sm text-gray-600 mt-1"><strong>Core Activities:</strong> {claim.core_activities}</p>
-            <p className="text-sm text-gray-600 mt-1"><strong>Supporting Activities:</strong> {claim.supporting_activities}</p>
-            <p className="text-sm text-gray-600 mt-1"><strong>Summary:</strong> {claim.claim_summary}</p>
-            <p className="text-sm text-gray-600 mt-1">💰 RDTI Credit: ${claim.rdti_credit} | 💸 RDTL Amount: ${claim.rdtl_amount}</p>
-          </div>
+          <Card key={claim.id} title={`📅 ${claim.fiscal_year}`}>
+            <p className="text-sm text-gray-700">
+              <strong>Core Activities:</strong> {claim.core_activities}
+            </p>
+            <p className="text-sm text-gray-700 mt-1">
+              <strong>Supporting Activities:</strong> {claim.supporting_activities}
+            </p>
+          </Card>
         ))}
       </div>
     </div>

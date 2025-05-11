@@ -1,75 +1,122 @@
-import React, { useState } from 'react';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirestore, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import React, { useState } from "react";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import {
+  getFirestore,
+  doc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+} from "firebase/firestore";
+import { toast } from "react-hot-toast";
+import { getAuth } from "firebase/auth";
+import { logAuditAction } from "../services/auditLogger";
 
 export default function EvidenceUpload({ activityId, onUploadComplete }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [downloadURL, setDownloadURL] = useState(null);
-  const storage = getStorage();
+  const [saved, setSaved] = useState(false);
+
   const db = getFirestore();
+  const storage = getStorage();
+  const user = getAuth().currentUser;
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
   const handleUpload = async () => {
-    if (!file || !activityId) return;
+    if (!file || !activityId) {
+      toast.error("Please select a file before uploading.");
+      return;
+    }
+
     setUploading(true);
-    const fileRef = ref(storage, \`evidence/\${activityId}/\${file.name}\`);
-    await uploadBytes(fileRef, file);
-    const url = await getDownloadURL(fileRef);
-    const fileMeta = {
-      name: file.name,
-      url,
-      uploadedAt: new Date().toISOString()
-    };
 
-    const activityRef = doc(db, "activities", activityId);
-    await updateDoc(activityRef, {
-      evidence: arrayUnion(fileMeta)
-    });
+    try {
+      const fileRef = ref(storage, `evidence/${activityId}/${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
 
-    setDownloadURL(url);
-    setUploading(false);
-    if (onUploadComplete) onUploadComplete(url);
+      const fileMeta = {
+        name: file.name,
+        url,
+        uploadedAt: new Date().toISOString(),
+      };
+
+      const activityRef = doc(db, "activities", activityId);
+      await updateDoc(activityRef, {
+        evidence: arrayUnion(fileMeta),
+      });
+
+      // ✅ Log audit action
+      if (user) await logAuditAction(user.uid, "UPLOAD_EVIDENCE", { activityId, fileName: file.name });
+
+      // ✅ Show undoable toast
+      toast((t) => (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-sm">📄 File uploaded</span>
+          <button
+            onClick={async () => {
+              try {
+                await deleteObject(fileRef);
+                await updateDoc(activityRef, {
+                  evidence: arrayRemove(fileMeta),
+                });
+                toast.dismiss(t.id);
+                toast.success("Undo complete. File removed.");
+
+                // 🔄 Log undo
+                if (user) await logAuditAction(user.uid, "UNDO_UPLOAD_EVIDENCE", { activityId, fileName: file.name });
+              } catch (err) {
+                console.error("Undo failed:", err);
+                toast.error("Could not undo upload.");
+              }
+            }}
+            className="text-blue-600 text-sm hover:underline"
+          >
+            Undo
+          </button>
+        </div>
+      ), { duration: 7000 });
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+
+      setFile(null);
+      if (onUploadComplete) onUploadComplete(fileMeta);
+    } catch (error) {
+      console.error("Upload failed:", error);
+      toast.error("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <div className="p-4 border rounded bg-white shadow mt-4">
-      <h3 className="font-semibold mb-2">📎 Upload Evidence for Activity ID: {activityId}</h3>
-      <input type="file" onChange={handleFileChange} className="mb-2" />
+    <div className="space-y-4">
+      <input
+        type="file"
+        onChange={handleFileChange}
+        disabled={uploading}
+        className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+          file:rounded file:border-0 file:text-sm file:font-semibold
+          file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+      />
       <button
         onClick={handleUpload}
         disabled={uploading}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50"
       >
-        {uploading ? 'Uploading...' : 'Upload Evidence'}
+        {uploading ? "Uploading..." : "Upload File"}
       </button>
-      {downloadURL && (
-        <p className="mt-2 text-green-600">
-          ✅ File uploaded. <a href={downloadURL} target="_blank" rel="noopener noreferrer" className="underline">View file</a>
-        </p>
-      )}
-    <div className="mt-6 bg-gray-50 p-4 rounded-lg shadow">
-  <h3 className="text-md font-semibold mb-2">🧠 Suggested Evidence to Upload</h3>
-  <ul className="list-disc ml-5 text-sm text-gray-700 space-y-1">
-    <li>GitHub / Git Logs (commits, diffs, branches)</li>
-    <li>Pull Requests & Feature Branches</li>
-    <li>Technical Design Documents (Notion, GDocs, Confluence)</li>
-    <li>Architecture Diagrams or Wireframes</li>
-    <li>Meeting Notes discussing R&D plans or technical challenges</li>
-    <li>Systematic Approach Notes (experiments, trials, testing logs)</li>
-    <li>Emails or Slack Threads showing discussions of technical uncertainty</li>
-    <li>Time Tracking Reports (Toggl, Harvest, etc)</li>
-    <li>Payroll Summaries with R&D effort allocations</li>
-    <li>Invoices from R&D contractors or consultants</li>
-    <li>Screenshots of prototypes or dev environments</li>
-    <li>Loom-style or demo videos showing R&D work</li>
-    <li>Exported tickets from Jira / Linear / Trello with descriptions</li>
-    <li>Spreadsheets or tables showing comparative analysis</li>
-  </ul>
-</div>
-</div>
+
+      {saved && <p className="text-green-600 text-sm">Saved ✔</p>}
+    </div>
   );
 }

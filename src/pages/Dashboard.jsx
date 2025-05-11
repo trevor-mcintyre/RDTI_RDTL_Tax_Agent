@@ -1,53 +1,69 @@
-import ExclusionChecklist from '../components/ExclusionChecklist';
-import React from 'react';
-import ProgressBar from '../components/ProgressBar';
-import MotivationBanner from '../components/MotivationBanner';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { Link } from "react-router-dom";
 
-const Dashboard = () => {
-  const claimProgress = 65; // placeholder percentage
-  const daysToDeadline = 42; // placeholder days
+import AnimatedPage from "../../components/AnimatedPage";
+import EmptyState from "../../components/EmptyState";
+import MotivationBanner from "../../components/MotivationBanner";
+import ProgressBar from "../../components/ProgressBar";
+import Card from "../../components/Card";
+
+export default function AdminDashboard() {
+  const hasData = false; // Placeholder: replace with admin-specific checks
+  const claimProgress = 65;
+  const daysToDeadline = 42;
 
   return (
-    
-      <ExclusionChecklist onUpload={(files, tag) => {
-        console.log("Exclusion files uploaded:", files, tag);
-        // Future: handle exclusion file storage
-      }} />
-    
-<div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">📊 R&D Tax Claim Dashboard</h1>
-      <MotivationBanner message="You're making great progress — keep it up!" />
+    <AnimatedPage>
+      <div className="space-y-8">
+        <header className="space-y-2">
+          <h1 className="text-3xl font-bold text-gray-900">🛠️ Admin Dashboard</h1>
+          <p className="text-gray-600">
+            Admin view: Overview of claims, deadlines, and submissions.
+          </p>
+        </header>
 
-      <div className="bg-white p-5 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-2">Overall Claim Progress</h2>
-        <ProgressBar percentage={claimProgress} />
-        <p className="text-sm text-gray-600 mt-1">{claimProgress}% complete</p>
-      </div>
+        <MotivationBanner message="Your team is progressing well. Keep an eye on key deadlines." />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="bg-blue-50 p-4 rounded shadow">
-          <h3 className="font-medium text-blue-800">🗓️ Next Deadline</h3>
-          <p className="text-sm text-gray-700">General Approval due in <strong>{daysToDeadline} days</strong></p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <Card title="Claim Progress Overview">
+            <ProgressBar percentage={claimProgress} />
+            <p className="text-sm text-gray-600">{claimProgress}% average completion</p>
+          </Card>
+
+          <Card title="Upcoming Deadline">
+            <p className="text-gray-700">
+              General Approval deadline in <strong>{daysToDeadline} days</strong>.
+            </p>
+            <Link
+              to="/claims"
+              className="inline-block mt-2 text-blue-600 hover:underline text-sm"
+            >
+              View All Claims
+            </Link>
+          </Card>
         </div>
-        <div className="bg-yellow-50 p-4 rounded shadow">
-          <h3 className="font-medium text-yellow-800">🚩 Flagged Risk Items</h3>
-          <p className="text-sm text-gray-700">3 sections need review before submission</p>
-        </div>
-      </div>
 
-      <div className="bg-gray-50 p-4 rounded shadow">
-        <h3 className="text-md font-semibold mb-2">🔗 Quick Access</h3>
-        <ul className="list-disc ml-5 text-sm text-blue-700 space-y-1">
-          <li><Link to="/claim/general-approval" className="hover:underline">General Approval</Link></li>
-          <li><Link to="/claim/supplementary-return" className="hover:underline">Supplementary Return</Link></li>
-          <li><Link to="/claim/evidence" className="hover:underline">Evidence Upload</Link></li>
-          <li><Link to="/claim/overview" className="hover:underline">Claim Summary</Link></li>
-          <li><Link to="/claim/history" className="hover:underline">Prior Year Claims</Link></li>
-</ul>
+        {!hasData && (
+          <EmptyState message="No admin-level activity to display yet. 👀" />
+        )}
+
+        <Card title="Admin Actions">
+          <div className="flex gap-4 flex-wrap">
+            <Link
+              to="/reports"
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            >
+              View Reports
+            </Link>
+            <Link
+              to="/clients"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+            >
+              Manage Clients
+            </Link>
+          </div>
+        </Card>
       </div>
-    </div>
+    </AnimatedPage>
   );
-};
-
-export default Dashboard;
+}

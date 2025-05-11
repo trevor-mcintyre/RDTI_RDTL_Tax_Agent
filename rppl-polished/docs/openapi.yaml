@@ -1,0 +1,33 @@
+
+openapi: 3.0.0
+info:
+  title: RPPL Tax Agent API
+  version: 1.0.0
+  description: Developer preview for RPPL REST API
+paths:
+  /claims:
+    get:
+      summary: Get all claims
+      responses:
+        '200':
+          description: List of claims
+    post:
+      summary: Create a new claim
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+      responses:
+        '201':
+          description: Claim created
+
+  /activities:
+    get:
+      summary: List activity items
+      responses:
+        '200':
+          description: Activity list

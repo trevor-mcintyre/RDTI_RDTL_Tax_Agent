@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import FriendlyProgressMeter from '../components/FriendlyProgressMeter';
-import RDTLEstimatePanel from '../components/RDTLEstimatePanel';
-import ProgressCelebration from '../components/ProgressCelebration';
+import React, { useState, useEffect } from "react";
+import FriendlyProgressMeter from "../components/FriendlyProgressMeter";
+import RDTLEstimatePanel from "../components/RDTLEstimatePanel";
+import ProgressCelebration from "../components/ProgressCelebration";
 
 export default function DemoShowcase() {
   const [progress, setProgress] = useState(0);
@@ -9,13 +9,14 @@ export default function DemoShowcase() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          setCelebrate(true);
+      setProgress((prev) => {
+        const next = prev + 10;
+        if (next >= 100) {
           clearInterval(interval);
+          setCelebrate(true);
           return 100;
         }
-        return prev + 10;
+        return next;
       });
     }, 500);
     return () => clearInterval(interval);
@@ -26,7 +27,7 @@ export default function DemoShowcase() {
       <h1 className="text-xl font-bold mb-4 text-center">🎉 RDTI UI Demo</h1>
       <FriendlyProgressMeter percentage={progress} />
       <RDTLEstimatePanel estimatedReturn={42350} />
-      <ProgressCelebration visible={celebrate} />
+      {celebrate && <ProgressCelebration visible />}
     </div>
   );
 }

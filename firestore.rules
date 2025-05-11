@@ -1,0 +1,21 @@
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Require auth for all access
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Restrict user data to their own UID
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // Example admin-only collection
+    match /adminData/{docId} {
+      allow read, write: if request.auth.token.admin == true;
+    }
+  }
+}

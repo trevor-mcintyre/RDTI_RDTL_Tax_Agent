@@ -1,0 +1,54 @@
+
+_export:
+  _type: export
+  __export_format: 4
+  __export_date: 2025-05-06T22:53:14.291520
+  __export_source: insomnia.desktop
+
+resources:
+  - _id: req_get_claims
+    _type: request
+    name: Get Claims
+    method: GET
+    url: "{ base_url }/claims"
+    body: {}
+    headers: []
+    parameters: []
+    authentication: {}
+
+  - _id: req_post_claims
+    _type: request
+    name: Create Claim
+    method: POST
+    url: "{ base_url }/claims"
+    body:
+      mimeType: application/json
+      text: |
+        {
+          "title": "My New Claim"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+    parameters: []
+    authentication: {}
+
+  - _id: req_get_activities
+    _type: request
+    name: Get Activities
+    method: GET
+    url: "{ base_url }/activities"
+    body: {}
+    headers: []
+    parameters: []
+    authentication: {}
+
+  - _id: env_base
+    _type: environment
+    name: Base Environment
+    data:
+      base_url: "https://rppl-tax-api.mockoon.cloud"
+    dataPropertyOrder:
+      "&":
+        - base_url
+    isPrivate: false

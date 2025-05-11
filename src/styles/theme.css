@@ -1,0 +1,15 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --rppl-primary: #3b82f6; /* blue-500 */
+  --rppl-accent: #10b981;  /* emerald-500 */
+  --rppl-warning: #f59e0b; /* amber-500 */
+  --rppl-font: 'Inter', sans-serif;
+}
+
+body {
+  font-family: var(--rppl-font);
+}
